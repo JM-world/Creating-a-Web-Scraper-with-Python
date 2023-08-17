@@ -4,7 +4,7 @@ if age < 18:
     print("You can't drink.")
 elif age >= 18 and age <= 35:
     print("You drink beer!")
-elif age == 60 or age ==70:
+elif age == 60 or age ==80:
     print("Birthday party!")
 else:
     print("Go ahead!")
