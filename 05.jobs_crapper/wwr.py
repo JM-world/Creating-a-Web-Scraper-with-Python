@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup
 
 def extract_wwr_jobs(keyword):
     base_url = "https://weworkremotely.com/remote-jobs/search?term="
-    search_term = "oracle"
 
     response = get(f"{base_url}{keyword}")
     if response.status_code != 200:
