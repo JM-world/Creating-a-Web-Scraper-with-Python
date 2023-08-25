@@ -1,6 +1,6 @@
 from requests import get
 from bs4 import BeautifulSoup
-from wwr import extract_wwr_jobs
+from ex06_wwr import extract_wwr_jobs
 
 base_url = "https://kr.indeed.com/jobs?q="
 search_term = "python"

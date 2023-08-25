@@ -1,49 +1,40 @@
 from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-import sys      # 한국어 출력 문제로 인한 해결방법
-import io
-sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='utf-8')
-sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding='utf-8')
-import time
+import requests
+import urllib.request as req
 
+iframeurl="PostList.naver?blogId=dazerro&widgetTypeCall=true&directAccess=true"
+url="https://blog.naver.com/"+iframeurl
+res= req.urlopen(url)
+soup= BeautifulSoup(res,'html.parser')
 
+text = soup.find("body", class_="contw-966")
+   
+print(text)
 
-options = Options()
-options.add_experimental_option("detach", True) # 브라우저 꺼짐 방지 옵션
+def extract_wwr_jobs(keyword):
+    base_url = "https://weworkremotely.com/remote-jobs/search?term="
 
-options.add_argument("--no--sandbox")
-options.add_argument("--disable-dev-shm-usage")
-browser = webdriver.Chrome(options=options)
-
-browser.get("https://blog.naver.com/dazerro")
-
-soup = BeautifulSoup(browser.page_source, "html.parser")
-time.sleep(3)
-job_list = soup.find("tbody", id="postBottomTitleListBody")
-time.sleep(3)
-print(len(job_list))
-# jobs = job_list.find_all("li", recursive=False)  #("li",recursive=False) = 한단계 아래에 있는 li만 찾아 줌.
-# # print(len(jobs))
-
-# results = []
-
-# for job in jobs:
-#     zone = job.find("div", class_="mosaic")
-#     if zone == None:
-#         anchor = job.select_one("h2 a")
-#         title = anchor["aria-label"]
-#         link = anchor["href"]
-#         company = job.find("span", class_="companyName")
-#         location = job.find("div", class_="companyLocation")
-#         job_data = {
-#             'company' : company.string,
-#             'link' : f"https://www.indeed.com/{link}",
-#             'position' : title,
-#             'location' : location.string
-#         }
-#         results.append(job_data)
-# for result in results:
-#     print(result, "//////\n//////")
-        
-        
+    response = get(f"{base_url}{keyword}")
+    if response.status_code != 200:
+        print("Can't request website")
+    else:
+        results = []
+        soup = BeautifulSoup(response.text, "html.parser")
+        jobs = soup.find_all('section', class_="jobs")
+        for job_section in jobs:
+            job_posts = job_section.find_all('li')
+            job_posts.pop(-1)
+            for post in job_posts:
+                anchors = post.find_all('a')
+                anchor = anchors[1]
+                link = anchor['href']
+                company, kind, region = anchor.find_all('span', class_='company')
+                title = anchor.find('span', class_='title')
+                job_data = {
+                    'link' : f"https://weworkremotely.com{link}",
+                    'company' : company.string,
+                    'region' : region.string,
+                    'psition' : title.string
+                }
+                results.append(job_data)
+        return results
