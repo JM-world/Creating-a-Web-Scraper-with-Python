@@ -47,5 +47,5 @@ def extract_indeed_job(keyword):
             }
             results.append(job_data)
     for result in results:
-        print(result, "//////\n//////")
+        print(result, "//////\n///////")
             
