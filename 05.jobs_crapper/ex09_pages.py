@@ -53,10 +53,10 @@ def extract_indeed_job(keyword):
                 company = job.find("span", class_="companyName")
                 location = job.find("div", class_="companyLocation")
                 job_data = {
-                    'company' : company.string,
                     'link' : f"https://www.indeed.com/{link}",
-                    'position' : title,
-                    'location' : location.string
+                    'company' : company.string.replace(",", " "),  #엑셀 행이 초과할때 replace로 고쳐주기
+                    'location' : location.string.replace(",", " "),
+                    'position' : title.replace(",", " ")
                 }
                 results.append(job_data)
     return results
