@@ -18,34 +18,46 @@ def get_page_count(keyword):
     browser.get(f"https://www.indeed.com/jobs?q={keyword}&limit=5")
 
     soup = BeautifulSoup(browser.page_source, "html.parser")
+    pagination = soup.find("ul", class_="pagination-list")
+    if pagination == None:
+        return 1
+    pages = pagination.find_all("li", recursive=False)
+    count = len(pages)
+    if count >= 5:
+        return 5
+    else:
+        return count
+
 
 def extract_indeed_job(keyword):
-    
-    browser.get(f"https://www.indeed.com/jobs?q={keyword}&limit=5")
-
-    soup = BeautifulSoup(browser.page_source, "html.parser")
-    job_list = soup.find("ul", class_="css-zu9cdh")
-    #print(len(job_list))
-    jobs = job_list.find_all("li", recursive=False)  #("li",recursive=False) = 한단계 아래에 있는 li만 찾아 줌.
-    # print(len(jobs))
-
+    pages = get_page_count(keyword)
+    print("Found", pages, "pages")
     results = []
+    for page in range(pages):
+        browser.get(f"https://www.indeed.com/jobs?q={keyword}&start={page*10}")
 
-    for job in jobs:
-        zone = job.find("div", class_="mosaic")
-        if zone == None:
-            anchor = job.select_one("h2 a")
-            title = anchor["aria-label"]
-            link = anchor["href"]
-            company = job.find("span", class_="companyName")
-            location = job.find("div", class_="companyLocation")
-            job_data = {
-                'company' : company.string,
-                'link' : f"https://www.indeed.com/{link}",
-                'position' : title,
-                'location' : location.string
-            }
-            results.append(job_data)
-    for result in results:
-        print(result, "////////\n///////")
+        soup = BeautifulSoup(browser.page_source, "html.parser")
+        job_list = soup.find("ul", class_="css-zu9cdh")
+        #print(len(job_list))
+        jobs = job_list.find_all("li", recursive=False)  #("li",recursive=False) = 한단계 아래에 있는 li만 찾아 줌.
+        # print(len(jobs))
+
+        
+
+        for job in jobs:
+            zone = job.find("div", class_="mosaic")
+            if zone == None:
+                anchor = job.select_one("h2 a")
+                title = anchor["aria-label"]
+                link = anchor["href"]
+                company = job.find("span", class_="companyName")
+                location = job.find("div", class_="companyLocation")
+                job_data = {
+                    'company' : company.string,
+                    'link' : f"https://www.indeed.com/{link}",
+                    'position' : title,
+                    'location' : location.string
+                }
+                results.append(job_data)
+    return results
             
